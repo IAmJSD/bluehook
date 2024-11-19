@@ -130,7 +130,7 @@ export default function Component({
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="url">URL (required)</Label>
+                                    <Label htmlFor="url">URL (required, your application endpoint, NOT a Discord webhook/Bluesky URL)</Label>
                                     <Input
                                         id="url"
                                         value={url}
