@@ -6,6 +6,7 @@ on:
             - main
         paths:
             - "worker/**"
+            - ".github/workflows/worker_deploy.yml"
 
 jobs:
     deploy:
@@ -24,6 +25,8 @@ jobs:
               with:
                 ruby-version: "3.3"
             - run: gem install kamal
+            - run: cd worker && cargo build --release && cp target/release/worker bin
+              name: Run cargo build
             - run: cd worker && kamal setup
               name: Run kamal setup
               env:
