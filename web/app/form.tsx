@@ -68,7 +68,8 @@ export default function Component({
                 </h1>
                 <p className="text-center mb-8 text-gray-600">
                     The best way to do webhooks on Bluesky. To use this, you
-                    will need an active API endpoint setup like this.
+                    will need an active API endpoint setup like this. To stop this,
+                    either respond with a 429/403 (or any other error code for over 2 hours).
                 </p>
 
                 <div className="bg-white shadow-md rounded-lg p-6">
