@@ -38,10 +38,11 @@ pub async fn delete_user(pool: &Pool, private_key: &str) {
 async fn load_user(
     conn: &Object, mut user: User, tree: &BulkSearchTree, dids: &RwLock<HashMap<String, Arc<User>>>,
 ) {
+    let hex_s = hex::encode(&user.private_key);
     let rows = conn.query(
-        "SELECT phrase FROM phrases WHERE private_key = $1", &[&user.private_key]
+        "SELECT phrase FROM phrases WHERE private_key = $1", &[&hex_s]
     ).await.unwrap();
-    let phrases: Vec<String> = rows.iter().map(|row| row.get::<_, String>(0)).collect();
+    let phrases: Vec<String> = rows.iter().map(|row| row.get::<_,String>(0)).collect();
     user.phrases = phrases;
     let user_arc = Arc::new(user);
     if let Some(did) = user_arc.did.clone() {

@@ -66,7 +66,7 @@ export default function Home() {
             throw new Error("HTTP_KEY is not set");
         }
         const res = await fetch(`https://${serverHostname}/${publicKey}`, {
-            method: "POST",
+            method: "PUT",
             headers: {
                 Authorization: httpKey,
             },
