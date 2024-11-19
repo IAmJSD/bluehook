@@ -69,7 +69,7 @@ export default function Component({
                 <p className="text-center mb-8 text-gray-600">
                     The best way to do webhooks on Bluesky. To use this, you
                     will need an active API endpoint setup <a href="https://github.com/IAmJSD/bluehook-example/blob/main/app/api/bluesky/route.ts">
-                        like this.
+                        <span className="underline font-bold">like this.</span>
                     </a>{" "}To stop this,
                     either respond with a 429/403 (or any other error code for over 2 hours).
                 </p>
