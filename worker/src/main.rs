@@ -83,17 +83,15 @@ async fn inform_user(
     let slice: &[u8; 32] = user.private_key.as_slice().try_into().unwrap();
     let mut signer = ed25519_dalek::SigningKey::from_bytes(slice);
     let ts_seconds_str = ts_seconds.to_string();
-    let mut new_msg_body = format!("{ts_seconds_str}{json}");
+    let json_clone = String::from(json.as_str());
+    let new_msg_body = format!("{ts_seconds_str}{json_clone}");
     let signature = hex::encode(
         signer.sign(new_msg_body.as_bytes()).to_vec()
     );
 
-    // Get after ts_seconds_str from new_msg_body and own it.
-    let after_ts_seconds_str = new_msg_body.split_off(ts_seconds_str.len());
-
     // Send the message to the user.
     match 
-        http_client.post(&user.endpoint).body(after_ts_seconds_str)
+        http_client.post(&user.endpoint).body(json_clone)
             .header("Content-Type", "application/json")
             .header("X-Signature-Ed25519", signature)
             .header("X-Signature-Timestamp", ts_seconds_str)
