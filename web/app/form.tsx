@@ -167,9 +167,11 @@ export default function Component({
                 </div>
 
                 <footer className="mt-8 text-center text-sm text-gray-500">
-                    Created by <a href="https://astrid.place">astrid.place</a>{" "}
+                    Created by <a href="https://astrid.place" className="underline">astrid.place</a>{" "}
                     with a lot of soda, Rust, and TypeScript! Thanks to the Blacksky
-                    group for all of the amazing libraries we are using!
+                    group for all of the amazing libraries we are using! I am looking for work in Sweden.
+                    If you are willing to help a British person relocate, I am a software engineer capable of making
+                    great user experiences (like this!). If you want to talk, please contact me!
                 </footer>
             </div>
         </div>
