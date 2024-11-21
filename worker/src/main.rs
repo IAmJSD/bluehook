@@ -206,9 +206,7 @@ async fn process(
                 }
             }
         }
-        Err(error) => {
-            eprintln!("Error parsing firehose message: {error:?}");
-        }
+        Err(_) => {}
     }
 }
 
