@@ -23,12 +23,6 @@ jobs:
                 chmod 644 ~/.kube/config
               env:
                 KUBECONFIG: ${{ secrets.KUBECONFIG }}
-            - run: rustup toolchain install stable
-            - uses: Swatinem/rust-cache@v2
-              with:
-                workspaces: ./worker -> target
-            - run: make
-              working-directory: ./worker
             - id: image-name
               name: Generate image name
               uses: ASzc/change-string-case-action@v6

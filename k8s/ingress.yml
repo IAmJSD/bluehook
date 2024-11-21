@@ -20,4 +20,4 @@ spec:
           service:
             name: worker
             port:
-              number: 80
+              number: 6969
