@@ -4,6 +4,6 @@ COPY . .
 RUN cargo build --release
 
 FROM debian:bookworm-slim
-RUN apt-get update && apt-get install -y libssl3
+RUN apt-get update && apt-get install -y libssl3 libpq5 ca-certificates
 COPY --from=base /builder/target/release/worker /usr/local/bin/worker
 ENTRYPOINT ["worker"]
