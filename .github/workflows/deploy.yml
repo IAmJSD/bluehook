@@ -1,0 +1,45 @@
+name: Deployment
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "worker/**"
+            - ".github/workflows/deploy.yml"
+
+jobs:
+    worker-deploy:
+        name: Deploy worker to Kubernetes
+        runs-on: ubuntu-24.04
+        steps:
+            - uses: actions/checkout@v4
+            - name: Sign into GHCR
+              run: echo "${{ github.token }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            - name: Write kubeconfig
+              run: |
+                mkdir -p ~/.kube
+                echo "$KUBECONFIG" > ~/.kube/config
+                chmod 644 ~/.kube/config
+              env:
+                KUBECONFIG: ${{ secrets.KUBECONFIG }}
+            - run: rustup toolchain install stable
+            - uses: Swatinem/rust-cache@v2
+              with:
+                workspaces: ./worker -> target
+            - run: make
+              working-directory: ./worker
+            - id: image-name
+              name: Generate image name
+              uses: ASzc/change-string-case-action@v6
+              with:
+                string: ghcr.io/${{ github.repository }}:${{ github.sha }}
+            - name: Build Docker image
+              run: docker build -t ${{ steps.image-name.outputs.lowercase }} ./worker
+            - name: Push Docker image
+              run: docker push ${{ steps.image-name.outputs.lowercase }}
+            - name: Deploy to Kubernetes
+              run: |
+                cd k8s
+                IMAGE=${{ steps.image-name.outputs.lowercase }} ./write_k8s.py
+                kubectl apply -f deployment.out.yml

@@ -1,0 +1,41 @@
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: worker
+
+spec:
+    replicas: 1
+    serviceName: worker
+    selector:
+        matchLabels:
+            app: worker
+    template:
+        metadata:
+            labels:
+                app: worker
+        spec:
+            imagePullSecrets:
+                - name: github
+            containers:
+                - name: worker
+                  image: "{image}"
+                  resources:
+                      requests:
+                          memory: "10Gi"
+                          cpu: "3"
+                      limits:
+                          memory: "10Gi"
+                          cpu: "3"
+                  env:
+                    - name: PG_CONNECTION_STRING
+                      valueFrom:
+                          secretKeyRef:
+                              name: worker
+                              key: database_url
+                    - name: HTTP_KEY
+                      valueFrom:
+                      valueFrom:
+                          secretKeyRef:
+                              name: worker
+                              key: http_key
