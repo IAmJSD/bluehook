@@ -12,7 +12,7 @@ use rsky_lexicon::{app::bsky::{feed::Post, richtext::Features}, com::atproto::sy
 use serde::Deserialize;
 use serde_json::json;
 use tokio::sync::RwLock;
-use std::{collections::{HashMap, HashSet}, io::Cursor, net::IpAddr, sync::{atomic::Ordering, Arc}, time::Duration};
+use std::{collections::{HashMap, HashSet}, fmt::Debug, io::Cursor, net::IpAddr, sync::{atomic::Ordering, Arc}, time::Duration};
 use tokio_tungstenite::tungstenite::protocol::Message;
 
 #[derive(Debug, Deserialize)]
@@ -76,22 +76,21 @@ async fn server_conn_failed(user: Arc<User>, tree: &BulkSearchTree, dids: &RwLoc
 
 // Inform the user about the post.
 async fn inform_user(
-    user: Arc<User>, json: Arc<String>, ts_seconds: i64, http_client: reqwest::Client,
+    user: Arc<User>, json: String, ts_seconds: i64, http_client: reqwest::Client,
     tree: &BulkSearchTree, dids: &RwLock<HashMap<String, Arc<User>>>, pg_pool: &Pool,
 ) {
     // Perform a ED25519 signature of the json including the timestamp in seconds.
     let slice: &[u8; 32] = user.private_key.as_slice().try_into().unwrap();
     let mut signer = ed25519_dalek::SigningKey::from_bytes(slice);
     let ts_seconds_str = ts_seconds.to_string();
-    let json_clone = String::from(json.as_str());
-    let new_msg_body = format!("{ts_seconds_str}{json_clone}");
+    let new_msg_body = format!("{ts_seconds_str}{json}");
     let signature = hex::encode(
         signer.sign(new_msg_body.as_bytes()).to_vec()
     );
 
     // Send the message to the user.
     match 
-        http_client.post(&user.endpoint).body(json_clone)
+        http_client.post(&user.endpoint).body(json)
             .header("Content-Type", "application/json")
             .header("X-Signature-Ed25519", signature)
             .header("X-Signature-Timestamp", ts_seconds_str)
@@ -155,14 +154,15 @@ async fn process(
                                 let text_lower = post.text.to_lowercase();
                                 let search_match_users = tree.find_all_matches(&text_lower).await;
                                 let uri = format!("at://{}/{}", commit.repo, op.path);
+                                let cid_enc = cid.to_string();
                                 let post_uri_json = serde_json::to_string(&json!({
+                                    "cid": cid_enc,
                                     "uri": uri,
                                     "post": post,
                                 })).unwrap();
-                                let json_arc = Arc::new(post_uri_json);
                                 let mut used_ids = HashSet::new();
                                 for user in search_match_users.into_iter() {
-                                    let json_clone = json_arc.clone();
+                                    let json_clone = post_uri_json.clone();
                                     let client_cpy = http_client.clone();
                                     used_ids.insert(user.id);
                                     let tree_ref = tree;
@@ -184,7 +184,7 @@ async fn process(
                                             if let Some(user) = user {
                                                 // Check if the user was already informed about this post and if not, inform them.
                                                 if !used_ids.contains(&user.id) {
-                                                    let json_clone = json_arc.clone();
+                                                    let json_clone = post_uri_json.clone();
                                                     let client_cpy = http_client.clone();
                                                     let tree_ref = tree;
                                                     let dids_ref = dids;
