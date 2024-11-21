@@ -235,7 +235,7 @@ async fn main() {
     // Connect to the firehose.
     loop {
         match tokio_tungstenite::connect_async(
-            "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos",
+            "wss://inkcap.us-east.host.bsky.network/xrpc/com.atproto.sync.subscribeRepos",
         )
         .await
         {
